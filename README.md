@@ -8,7 +8,7 @@ Set-ExecutionPolicy RemoteSigned -scope Process
 Invoke-WebRequest -Uri "https://github.com/enumori/epyenv/releases/download/2021.01.23/epyenv.zip" -OutFile .\epyenv.zip
 Expand-Archive -Path .\epyenv.zip -DestinationPath $env:USERPROFILE
 Remove-Item .\epyenv.zip
-Rename-Item  $env:USERPROFILE\ndenv  $env:USERPROFILE\.ndenv
+Rename-Item  $env:USERPROFILE\epyenv  $env:USERPROFILE\.epyenv
 $path = [Environment]::GetEnvironmentVariable("PATH", "User")
 $path = "$env:USERPROFILE\.epyenv;" + $path
 [Environment]::SetEnvironmentVariable("PATH", $path, "User")
