@@ -1,0 +1,54 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="epyenv.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="PythonURL" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://www.python.org/ftp/python/</Value>
+    </Setting>
+    <Setting Name="GetPipURL" Type="System.String" Scope="User">
+      <Value Profile="(Default)">https://bootstrap.pypa.io/get-pip.py</Value>
+    </Setting>
+    <Setting Name="GetPipName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">get-pip.py</Value>
+    </Setting>
+    <Setting Name="tkinter3_5_Amd64" Type="System.String" Scope="User">
+      <Value Profile="(Default)">tkinter3.5.X_Amd64.zip</Value>
+    </Setting>
+    <Setting Name="tkinter3_6_Amd64" Type="System.String" Scope="User">
+      <Value Profile="(Default)">tkinter3.6.X_Amd64.zip</Value>
+    </Setting>
+    <Setting Name="tkinter3_7_Amd64" Type="System.String" Scope="User">
+      <Value Profile="(Default)">tkinter3.7.X_Amd64.zip</Value>
+    </Setting>
+    <Setting Name="tkinter3_8_Amd64" Type="System.String" Scope="User">
+      <Value Profile="(Default)">tkinter3.8.X_Amd64.zip</Value>
+    </Setting>
+    <Setting Name="tkinter3_9_Amd64" Type="System.String" Scope="User">
+      <Value Profile="(Default)">tkinter3.9.X_Amd64.zip</Value>
+    </Setting>
+    <Setting Name="tkinter3_5_Win32" Type="System.String" Scope="User">
+      <Value Profile="(Default)">tkinter3.5.X_Win32.zip</Value>
+    </Setting>
+    <Setting Name="tkinter3_6_Win32" Type="System.String" Scope="User">
+      <Value Profile="(Default)">tkinter3.6.X_Win32.zip</Value>
+    </Setting>
+    <Setting Name="tkinter3_7_Win32" Type="System.String" Scope="User">
+      <Value Profile="(Default)">tkinter3.7.X_Win32.zip</Value>
+    </Setting>
+    <Setting Name="tkinter3_8_Win32" Type="System.String" Scope="User">
+      <Value Profile="(Default)">tkinter3.8.X_Win32.zip</Value>
+    </Setting>
+    <Setting Name="tkinter3_9_Win32" Type="System.String" Scope="User">
+      <Value Profile="(Default)">tkinter3.9.X_Win32.zip</Value>
+    </Setting>
+    <Setting Name="ArchAmd64" Type="System.String" Scope="User">
+      <Value Profile="(Default)">amd64</Value>
+    </Setting>
+    <Setting Name="ArchWin32" Type="System.String" Scope="User">
+      <Value Profile="(Default)">win32</Value>
+    </Setting>
+    <Setting Name="PythonEmbedName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">python-{0}-embed-{1}.zip</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
