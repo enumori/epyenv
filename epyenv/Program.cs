@@ -33,10 +33,9 @@ namespace epyenv
                 }
             }
         }
-        static List<VersionInfo> _VersionList = new List<VersionInfo>();
         static string _AppDir = "";
         static string _InstallDir = "";
-
+        static int _WaitCharId = 0;
         public enum ErrorCode
         {
             NO_ERROR,
@@ -109,7 +108,6 @@ namespace epyenv
             System.Diagnostics.Debug.WriteLine("ProcInstall");
             System.Diagnostics.Debug.WriteLine("opt.Version:" + opt.Version);
             System.Diagnostics.Debug.WriteLine("opt.Dir:" + opt.Dir);
-            GetList();
             if (opt.Dir != null)
             {
                 _InstallDir = GetFullPath(System.IO.Directory.GetCurrentDirectory() + "\\", opt.Dir);
@@ -120,12 +118,101 @@ namespace epyenv
             }
             return ret_code;
         }
+        static string WaitChar()
+        {
+
+            if (_WaitCharId == 0)
+            {
+                _WaitCharId = 1;
+                return "\b|";
+            }
+            else
+            {
+                _WaitCharId = 0;
+                return "\b-";
+            }
+
+        }
 
         static ErrorCode ProcVersionList()
         {
             ErrorCode ret_code = ErrorCode.NO_ERROR;
-            GetList();
-            foreach (var ver in _VersionList)
+            string url = Properties.Settings.Default.PythonURL;
+            string source = "";
+            List<VersionInfo> version_info_list = new List<VersionInfo>();
+            List<string> version_list = new List<string>();
+            System.Net.HttpWebRequest webreq = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(url);
+            Console.Write(url + "を検索中です。 ");
+            using (System.Net.HttpWebResponse webres = (System.Net.HttpWebResponse)webreq.GetResponse())
+            {
+                using (System.IO.Stream st = webres.GetResponseStream())
+                {
+                    //文字コードを指定して、StreamReaderを作成
+                    using (System.IO.StreamReader sr = new System.IO.StreamReader(st, System.Text.Encoding.UTF8))
+                    {
+                        source = sr.ReadToEnd();
+                    }
+                }
+            }
+
+            HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
+            doc.LoadHtml(source);
+            foreach (HtmlNode link in doc.DocumentNode.SelectNodes("//a"))
+            {
+                Console.Write(WaitChar());
+                if (System.Text.RegularExpressions.Regex.IsMatch(link.InnerHtml, @"^[0-9]+(\.[0-9]+)*"))
+                {
+                    Regex re = new Regex(@"^[0-9]+(\.[0-9]+)*/", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                    Match m = re.Match(link.InnerHtml);
+                    while (m.Success)
+                    {
+                        Console.Write(WaitChar());
+                        if (m.Value == link.InnerHtml)
+                        {
+                            version_list.Add(m.Value.TrimEnd('/'));
+                        }
+                        m = m.NextMatch();
+                    }
+                }                
+            }
+            foreach (var ver in version_list)
+            {
+                webreq = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(url + '/' + ver + '/');
+                using (System.Net.HttpWebResponse webres = (System.Net.HttpWebResponse)webreq.GetResponse())
+                {
+                    using (System.IO.Stream st = webres.GetResponseStream())
+                    {
+                        //文字コードを指定して、StreamReaderを作成
+                        using (System.IO.StreamReader sr = new System.IO.StreamReader(st, System.Text.Encoding.UTF8))
+                        {
+                            source = sr.ReadToEnd();
+                        }
+                    }
+                }
+
+                doc = new HtmlAgilityPack.HtmlDocument();
+                doc.LoadHtml(source);
+                foreach (HtmlNode link in doc.DocumentNode.SelectNodes("//a"))
+                {
+                    Console.Write(WaitChar());
+                    string file_name = "";
+                    file_name = string.Format(Properties.Settings.Default.PythonEmbedName, ver, Properties.Settings.Default.ArchAmd64);
+                    if (link.InnerHtml.Equals(file_name))
+                    {
+                        version_info_list.Add(new VersionInfo() { Version = ver, Arch = Properties.Settings.Default.ArchAmd64, FileName = file_name });
+                    }
+                    file_name = string.Format(Properties.Settings.Default.PythonEmbedName, ver, Properties.Settings.Default.ArchWin32);
+                    if (link.InnerHtml.Equals(file_name))
+                    {
+                        version_info_list.Add(new VersionInfo() { Version = ver, Arch = Properties.Settings.Default.ArchWin32, FileName = file_name });
+                    }
+                }
+            }
+            Console.Write("\b ");
+            Console.Write(Environment.NewLine);
+            version_info_list.Sort((a, b) => string.Compare(Version2String(a.Version), Version2String(b.Version)));
+
+            foreach (var ver in version_info_list)
             {
                 Console.WriteLine(ver.VersionName);
             }
@@ -183,11 +270,6 @@ namespace epyenv
                 System.Console.Error.WriteLine("不正なバージョン文字列です。");
                 return ErrorCode.INVALID_ARGS;
             }
-            if (!_VersionList.Where(w => w.VersionName == version).Any())
-            {
-                System.Console.Error.WriteLine("指定されたバージョンが見つかりませんでした。");
-                return ErrorCode.INVALID_ARGS;
-            }
             ver.FileName = string.Format(Properties.Settings.Default.PythonEmbedName, ver.Version, ver.Arch);
 
             if ((ret_code = DownloadPythonEmbed(ver)) != ErrorCode.NO_ERROR)
@@ -203,77 +285,6 @@ namespace epyenv
                 return ret_code;
             }
             return ret_code;
-        }
-
-        static void GetList()
-        {
-            string url = Properties.Settings.Default.PythonURL;
-            string source = "";
-            List<string> version_list = new List<string>();
-            System.Net.HttpWebRequest webreq = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(url);
-            using (System.Net.HttpWebResponse webres = (System.Net.HttpWebResponse)webreq.GetResponse())
-            {
-                using (System.IO.Stream st = webres.GetResponseStream())
-                {
-                    //文字コードを指定して、StreamReaderを作成
-                    using (System.IO.StreamReader sr = new System.IO.StreamReader(st, System.Text.Encoding.UTF8))
-                    {
-                        source = sr.ReadToEnd();
-                    }
-                }
-            }
-
-            HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
-            doc.LoadHtml(source);
-            foreach (HtmlNode link in doc.DocumentNode.SelectNodes("//a"))
-            {
-                if (System.Text.RegularExpressions.Regex.IsMatch(link.InnerHtml, @"^[0-9]+(\.[0-9]+)*"))
-                {
-                    Regex re = new Regex(@"^[0-9]+(\.[0-9]+)*/", RegexOptions.IgnoreCase | RegexOptions.Singleline);
-                    Match m = re.Match(link.InnerHtml);
-                    while (m.Success)
-                    {
-                        if (m.Value == link.InnerHtml)
-                        {
-                            version_list.Add(m.Value.TrimEnd('/'));
-                        }
-                        m = m.NextMatch();
-                    }
-                }
-            }
-            foreach (var ver in version_list)
-            {
-                webreq = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(url + '/' + ver + '/');
-                using (System.Net.HttpWebResponse webres = (System.Net.HttpWebResponse)webreq.GetResponse())
-                {
-                    using (System.IO.Stream st = webres.GetResponseStream())
-                    {
-                        //文字コードを指定して、StreamReaderを作成
-                        using (System.IO.StreamReader sr = new System.IO.StreamReader(st, System.Text.Encoding.UTF8))
-                        {
-                            source = sr.ReadToEnd();
-                        }
-                    }
-                }
-
-                doc = new HtmlAgilityPack.HtmlDocument();
-                doc.LoadHtml(source);
-                foreach (HtmlNode link in doc.DocumentNode.SelectNodes("//a"))
-                {
-                    string file_name = "";
-                    file_name = string.Format(Properties.Settings.Default.PythonEmbedName, ver, Properties.Settings.Default.ArchAmd64);
-                    if (link.InnerHtml.Equals(file_name))
-                    {
-                        _VersionList.Add(new VersionInfo() { Version = ver, Arch = Properties.Settings.Default.ArchAmd64, FileName = file_name });
-                    }
-                    file_name = string.Format(Properties.Settings.Default.PythonEmbedName, ver, Properties.Settings.Default.ArchWin32);
-                    if (link.InnerHtml.Equals(file_name))
-                    {
-                        _VersionList.Add(new VersionInfo() { Version = ver, Arch = Properties.Settings.Default.ArchWin32, FileName = file_name });
-                    }
-                }
-            }
-            _VersionList.Sort((a, b) => string.Compare(Version2String(a.Version), Version2String(b.Version)));
         }
 
         static string Version2String(string version)
@@ -302,16 +313,29 @@ namespace epyenv
             }
             if (!System.IO.File.Exists(python))
             {
-                System.Console.WriteLine("Python Windows embeddable package(" + ver.FileName + ")をインストール中");
 
 
                 string url = string.Format("{0}/{1}/{2}", Properties.Settings.Default.PythonURL, ver.Version, ver.FileName);
 
                 System.Net.WebClient wc = new System.Net.WebClient();
-                System.Diagnostics.Debug.WriteLine("ダウンロード: " + url + " -> " + ver.FileName);
+
+
                 string download = System.IO.Path.Combine(_InstallDir, ver.FileName);
-                wc.DownloadFile(url, download);
-                wc.Dispose();
+                try
+                {
+                    wc.DownloadFile(url, download);
+                    System.Console.WriteLine("Python Windows embeddable package(" + ver.FileName + ")をインストール中");
+                    System.Diagnostics.Debug.WriteLine("ダウンロード: " + url + " -> " + ver.FileName);
+                }
+                catch
+                {
+                    System.Console.Error.WriteLine("指定されたバージョンが見つかりませんでした。");
+                    return ErrorCode.INVALID_ARGS;
+                }
+                finally
+                {
+                    wc.Dispose();
+                }
                 ExtractToDirectoryExtensions(download, _InstallDir, true);
                 System.IO.File.Delete(download);
             }
