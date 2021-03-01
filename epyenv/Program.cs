@@ -326,18 +326,18 @@ namespace epyenv
                     wc.DownloadFile(url, download);
                     System.Console.WriteLine("Python Windows embeddable package(" + ver.FileName + ")をインストール中");
                     System.Diagnostics.Debug.WriteLine("ダウンロード: " + url + " -> " + ver.FileName);
+                    ExtractToDirectoryExtensions(download, _InstallDir, true);
+                    System.IO.File.Delete(download);
                 }
                 catch
                 {
                     System.Console.Error.WriteLine("指定されたバージョンが見つかりませんでした。");
-                    return ErrorCode.INVALID_ARGS;
+                    ret_code = ErrorCode.INVALID_ARGS;
                 }
                 finally
                 {
                     wc.Dispose();
                 }
-                ExtractToDirectoryExtensions(download, _InstallDir, true);
-                System.IO.File.Delete(download);
             }
             return ret_code;
         }
