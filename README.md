@@ -5,7 +5,7 @@ Simple Python Windows x86-64 embeddable installer
 powershellを起動して以下のコマンドを入力します。
 ```
 Set-ExecutionPolicy RemoteSigned -scope Process
-Invoke-WebRequest -Uri "https://github.com/enumori/epyenv/releases/download/2021.03.03/epyenv.zip" -OutFile .\epyenv.zip
+Invoke-WebRequest -Uri "https://github.com/enumori/epyenv/releases/download/2021.03.15/epyenv.zip" -OutFile .\epyenv.zip
 Expand-Archive -Path .\epyenv.zip -DestinationPath $env:USERPROFILE
 Remove-Item .\epyenv.zip
 Rename-Item  $env:USERPROFILE\epyenv  $env:USERPROFILE\.epyenv
