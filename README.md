@@ -4,7 +4,7 @@ Simple Python Windows x86-64 embeddable installer
 # 1. Installation
 レポジトリのソリューションのビルドを行い、[リリースフォルダーに作成されたファイル](https://github.com/enumori/epyenv/releases/download/2021.05.03/epyenv.zip)を任意のフォルダーに配置します。配置したフォルダーにパスを通します。
 
-powershellを起動して以下のコマンドを入力します。
+もしくは、powershellを起動して以下のコマンドを入力します。
 
 ```
 Set-ExecutionPolicy RemoteSigned -scope Process
